@@ -1,44 +1,47 @@
-from turtle import Screen
-from food import Food
-import time
-from snake import Snake
+from turtle import Screen, Turtle
+from paddle import Paddle
+from ball import Ball
 from scoreboard import Scoreboard
+import time
+
 screen = Screen()
-screen.setup(width=500,height=500)
 screen.bgcolor("black")
-screen.title("Snake game")
+screen.setup(width=800, height=600)
+screen.title("Pong")
 screen.tracer(0)
-snake = Snake()
-food=Food()
-scoreboard=Scoreboard()
+
+r_paddle = Paddle((350, 0))
+l_paddle = Paddle((-350, 0))
+ball = Ball()
+scoreboard = Scoreboard()
+
 screen.listen()
-screen.onkey(snake.up, "Up")
-screen.onkey(snake.down, "Down")
-screen.onkey(snake.right, "Right")
-screen.onkey(snake.left, "Left")
-segments =[]
+screen.onkey(r_paddle.go_up, "Up")
+screen.onkey(r_paddle.go_down, "Down")
+screen.onkey(l_paddle.go_up, "w")
+screen.onkey(l_paddle.go_down, "s")
+
 game_is_on = True
 while game_is_on:
     screen.update()
-    time.sleep(0.1)
-    snake.move()
-    #Detection  of food
-    if snake.head.distance(food)<15:
-        food.refresh()
-        snake.extend()
-        scoreboard.increase_score()
-    if snake.head.xcor() > 250 or snake.head.xcor() <-250 or snake.head.ycor() > 250 or snake.head.ycor() < -250:
-        game_is_on =False
-        scoreboard.game_over()
-    #dection with tail
-    for segment in snake.segments:
-        if segment==snake.head:
-            pass
-        elif snake.head.distance(segment) <10:
-            game_is_on=False
-            scoreboard.game_over()
+    ball.move()
 
+    #Detect collision with wall
+    if ball.ycor() > 280 or ball.ycor() < -280:
+        ball.bounce_y()
 
+    #Detect collision with paddle
+    if ball.distance(r_paddle) < 50 and ball.xcor() > 320 or ball.distance(l_paddle) < 50 and ball.xcor() < -320:
+        ball.bounce_x()
+
+    #Detect R paddle misses
+    if ball.xcor() > 380:
+        ball.reset_position()
+        scoreboard.l_point()
+
+    #Detect L paddle misses:
+    if ball.xcor() < -380:
+        ball.reset_position()
+        scoreboard.r_point()
 
 screen.exitonclick()
-
